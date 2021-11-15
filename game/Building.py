@@ -45,6 +45,7 @@ class Building(Env):
         arrived_passengers_num_lst = []
         penalty_lst = []
 
+
         for i, e in enumerate(self.elevators):
             cur = action % 4
             action /= 4
@@ -76,7 +77,7 @@ class Building(Env):
 
         observation = None
         reward = + sum(penalty_lst) - self.get_remain_all_passengers()
-        done = True
+        done = self.remain_passengers_num == 0
         info = None
         return [observation, reward, done, info]
     def render(self):
@@ -178,3 +179,46 @@ class Building(Env):
         reward = + sum(penalty_lst) - self.get_remain_all_passengers()
         return reward
         #return self.get_reward()
+
+
+    def render(self, step : int):
+        for idx in reversed(list(range(1,self.max_floor))):
+            print("=======================================================")
+            print("= Floor #%02d ="%idx, end=' ')
+            for e in self.elevators:
+                if e.curr_floor == idx:
+                    print("  Lift #%d"%e.idx, end=' ')
+                else:
+                    print("         ", end=' ')
+            print(" ")
+            print("=  Waiting  =", end=' ')
+            for e in self.elevators:
+                if e.curr_floor == idx:
+                    print("    %02d   "%len(e.curr_passengers_in_elv), end=' ')
+                else:
+                    print("          ", end=' ')
+            print(" ")
+            print("=    %03d    ="%len(self.floors_information[idx]))
+        print("=======================================================")
+        print("= Floor #00 =", end=' ')
+        for e in self.elevators:
+            if e.curr_floor == 0:
+                print("  Lift #%d"%e.idx, end=' ')
+            else:
+                print("         ", end=' ')
+        print(" ")
+        print("=  Arrived  =", end=' ')
+        for e in self.elevators:
+            if e.curr_floor == 0:
+                print("    %02d   "%len(e.curr_passengers_in_elv), end=' ')
+            else:
+                print("          ", end=' ')
+        print(" ")
+        print("=    %03d    ="%len(self.floors_information[0]))
+        print("=======================================================")
+        print("")
+        print("People to move: %d "%(self.remain_passengers_num - len(self.floors_information[0])))
+        print("Total # of people: %d"%self.remain_passengers_num)
+        print("Step: %d"%step)
+        print('state : ',self.get_state())
+        #print('now reward : ',self.get_reward())
