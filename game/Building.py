@@ -1,10 +1,12 @@
 
 import numpy as np
+from gym import Env
+from gym.spaces import Discrete, Box
 
-from environment.Elevator import Elevator
-from environment.Passenger import Passenger
+from game.Elevator import Elevator
+from game.Passenger import Passenger
 
-class Building(object):
+class Building(Env):
     '''
     Building controls elevators and passengers.
     It sets constraints and operates entire environment.
@@ -19,6 +21,12 @@ class Building(object):
         floors_information(list(Passenger)) : passenger's information on each floor
         elevators(list(Elevator)) : elevator list
         '''
+        #Initialize Env parameters
+        self.action_space = Discrete(4**total_elevator_num)
+        self.observation_space = Box(low = np.array([0]), high = np.array([2]))
+        self.state = 0
+
+        # Initialize Building parameters
         self.remain_passengers_num = 0
         self.cumulated_reward = 0
         self.total_elevator_num = total_elevator_num
@@ -31,6 +39,52 @@ class Building(object):
         self.floors_information = []
         for idx in range(max_floor):
             self.floors_information.append([])
+
+    def step(self, action):
+
+        arrived_passengers_num_lst = []
+        penalty_lst = []
+
+        for i, e in enumerate(self.elevators):
+            cur = action % 4
+            action /= 4
+
+            if cur == 0:
+                # go up
+                if (e.max_floor-1) == (e.curr_floor):
+                    penalty_lst.append(-1)
+                e.move_up()
+
+            elif cur == 1:
+                # go down
+                if e.curr_floor == 0 :
+                    penalty_lst.append(-1)
+                e.move_down()
+
+            elif cur==2:
+                # hold this floor and load
+                if len(self.floors_information[e.curr_floor]) == 0:
+                    penalty_lst.append(-1)
+                self.floors_information[e.curr_floor] = e.load_passengers(self.floors_information[e.curr_floor])
+
+            else:
+                # hold this floor and unload
+                arrived_passengers_num = e.unload_passengers(self.floors_information[e.curr_floor])
+                if arrived_passengers_num == 0 :
+                    penalty_lst.append(-1)
+                arrived_passengers_num_lst.append(arrived_passengers_num)
+
+        observation = None
+        reward = + sum(penalty_lst) - self.get_remain_all_passengers()
+        done = True
+        info = None
+        return [observation, reward, done, info]
+    def render(self):
+        pass
+
+    def reset(self):
+        self.state = 0
+        self.empty_building()
 
     def get_arrived_passengers(self) -> int :
         arrived_passengers=0
@@ -62,12 +116,16 @@ class Building(object):
         for e in self.elevators:
             e.empty()
         self.remain_passengers_num = 0
+
     def get_remain_passengers_in_building(self):
         return sum([len(x) for x in self.floors_information])
+
     def get_remain_passengers_in_elv(self,elv):
         return len(elv.curr_passengers_in_elv)
+
     def get_remain_all_passengers(self):
         return sum([self.get_remain_passengers_in_elv(x) for x in self.elevators]) +  self.get_remain_passengers_in_building()
+
     def generate_passengers(self, prob : float, passenger_max_num : int = 6):
         '''
         generate random people in building and button press in each floor

@@ -1,19 +1,28 @@
 import gym
 from network.Agent import Agent as Agent
 # from utils import plotLearning
+from game.Building import Building
 import numpy as np
 
+total_elevator_num = 1
+max_floor = 5
+max_passengers_in_floor = 10
+max_passengers_in_elevator = 5
+
 if __name__ == '__main__':
-    env = gym.make('elevatorScheduling-v1')
-    agent = Agent(gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4, eps_end=0.01,
-                  input_dims=[8], lr=0.001)
+    env = Building(total_elevator_num = total_elevator_num, max_floor = max_floor,
+                   max_passengers_in_floor = max_passengers_in_floor,
+                   max_passengers_in_elevator = max_passengers_in_elevator)
+
+    agent = Agent(gamma=0.99, epsilon=1.0, batch_size=64, n_actions=4**total_elevator_num, eps_end=0.01,
+                  input_dims=[4**total_elevator_num], lr=0.001)
     scores, eps_history = [], []
-    n_games = 500
+    n_games = 128
 
     for i in range(n_games):
         score = 0
         done = False
-        observation = env.reset()
+        observation = env.empty_building()
         while not done:
             action = agent.choose_action(observation)
             observation_, reward, done, info = env.step(action)
