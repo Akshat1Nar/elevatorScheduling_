@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     agent = Agent(gamma=0.99, epsilon=1.0, batch_size=64,
                   n_actions=4**total_elevator_num, eps_end=0.01,
-                  input_dims=[8], lr=0.001)
+                  input_dims=[2], lr=0.001)
 
     scores, eps_history = [], []
     n_games = 1
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     for i in range(n_games):
         score = 0
         done = False
-        observation = env.empty_building()
+        observation = env.reset()
         env.generate_passengers(0.5, passenger_max_num  = 10)
         steps = 0
 

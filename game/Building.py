@@ -86,6 +86,8 @@ class Building(Env):
     def reset(self):
         self.state = 0
         self.empty_building()
+        return [[self.remain_passengers_num],
+                [self.cumulated_reward]]
 
     def get_arrived_passengers(self) -> int :
         arrived_passengers=0
