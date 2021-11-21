@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     agent = Agent(gamma=0.99, epsilon=1.0, batch_size=64,
                   n_actions=4**total_elevator_num, eps_end=0.01,
-                  input_dims=[2], lr=0.001)
+                  input_dims=[2,], lr=0.001)
 
     scores, eps_history = [], []
     n_games = 1
@@ -28,7 +28,8 @@ if __name__ == '__main__':
         env.generate_passengers(0.5, passenger_max_num  = 10)
         steps = 0
 
-        while not done:
+        while not done and steps<30:
+
             steps += 1
             action = agent.choose_action(observation)
             observation_, reward, done, info = env.step(action)
@@ -45,7 +46,7 @@ if __name__ == '__main__':
         print('episode ', i, 'score %.2f' % score,
                 'average score %.2f' % avg_score,
                 'epsilon %.2f' % agent.epsilon)
-        env.render(steps)
+        # env.render(steps)
     # x = [i+1 for i in range(n_games)]
     # filename = 'lunar_lander.png'
     # plotLearning(x, scores, eps_history, filename)

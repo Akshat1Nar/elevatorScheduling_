@@ -41,6 +41,7 @@ class Building(Env):
             self.floors_information.append([])
 
     def step(self, action):
+        print(action)
 
         arrived_passengers_num_lst = []
         penalty_lst = []
@@ -75,10 +76,11 @@ class Building(Env):
                     penalty_lst.append(-1)
                 arrived_passengers_num_lst.append(arrived_passengers_num)
 
-        observation = None
         reward = + sum(penalty_lst) - self.get_remain_all_passengers()
         done = self.remain_passengers_num == 0
         info = None
+        observation =  np.array([[self.remain_passengers_num],
+                                [self.cumulated_reward]]).reshape(2,)
         return [observation, reward, done, info]
     def render(self):
         pass
@@ -86,8 +88,8 @@ class Building(Env):
     def reset(self):
         self.state = 0
         self.empty_building()
-        return [[self.remain_passengers_num],
-                [self.cumulated_reward]]
+        return np.array([[self.remain_passengers_num],
+                [self.cumulated_reward]]).reshape(2,)
 
     def get_arrived_passengers(self) -> int :
         arrived_passengers=0
