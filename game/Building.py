@@ -11,7 +11,7 @@ class Building(Env):
     Building controls elevators and passengers.
     It sets constraints and operates entire environment.
     '''
-    def __init__(self, total_elevator_num : int, max_floor : int, max_passengers_in_floor : int,max_passengers_in_elevator : int):
+    def __init__(self, total_elevator_num : int, max_floor : int, max_passengers_in_floor : int,max_passengers_in_elevator : int, max_time : int):
         '''
         remain_passengers_num(int) : remain passengers in building
         total_elevator_num(int) : total number of elevator
@@ -25,6 +25,8 @@ class Building(Env):
         self.action_space = Discrete(4**total_elevator_num)
         self.observation_space = Box(low = np.array([0]), high = np.array([2]))
         self.state = 0
+        self.time_taken = 0
+        self.max_time = max_time
 
         # Initialize Building parameters
         self.remain_passengers_num = 0
@@ -41,7 +43,7 @@ class Building(Env):
             self.floors_information.append([])
 
     def step(self, action):
-        print(action)
+        self.time_taken += 1
 
         arrived_passengers_num_lst = []
         penalty_lst = []
@@ -77,7 +79,7 @@ class Building(Env):
                 arrived_passengers_num_lst.append(arrived_passengers_num)
 
         reward = + sum(penalty_lst) - self.get_remain_all_passengers()
-        done = self.remain_passengers_num == 0
+        done = self.remain_passengers_num == 0 or self.time_taken<self.max_time
         info = None
         observation =  np.array([[self.remain_passengers_num],
                                 [self.cumulated_reward]]).reshape(2,)

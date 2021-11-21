@@ -8,18 +8,20 @@ total_elevator_num = 1
 max_floor = 5
 max_passengers_in_floor = 10
 max_passengers_in_elevator = 5
+max_time = 100
 
 if __name__ == '__main__':
     env = Building(total_elevator_num = total_elevator_num, max_floor = max_floor,
                    max_passengers_in_floor = max_passengers_in_floor,
-                   max_passengers_in_elevator = max_passengers_in_elevator)
+                   max_passengers_in_elevator = max_passengers_in_elevator,
+                   max_time = max_time)
 
     agent = Agent(gamma=0.99, epsilon=1.0, batch_size=64,
                   n_actions=4**total_elevator_num, eps_end=0.01,
                   input_dims=[2,], lr=0.001)
 
     scores, eps_history = [], []
-    n_games = 1
+    n_games = 50
 
     for i in range(n_games):
         score = 0
@@ -28,7 +30,7 @@ if __name__ == '__main__':
         env.generate_passengers(0.5, passenger_max_num  = 10)
         steps = 0
 
-        while not done and steps<30:
+        while not done:
 
             steps += 1
             action = agent.choose_action(observation)
