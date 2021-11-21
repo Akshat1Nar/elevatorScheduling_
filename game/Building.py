@@ -1,3 +1,4 @@
+import os, time
 
 import numpy as np
 from gym import Env
@@ -79,13 +80,11 @@ class Building(Env):
                 arrived_passengers_num_lst.append(arrived_passengers_num)
 
         reward = + sum(penalty_lst) - self.get_remain_all_passengers()
-        done = self.remain_passengers_num == 0 or self.time_taken<self.max_time
+        done = self.remain_passengers_num == 0 or self.time_taken>self.max_time
         info = None
         observation =  np.array([[self.remain_passengers_num],
                                 [self.cumulated_reward]]).reshape(2,)
         return [observation, reward, done, info]
-    def render(self):
-        pass
 
     def reset(self):
         self.state = 0
@@ -116,13 +115,20 @@ class Building(Env):
         '''
         clears the building
         '''
-        self.floors_information = []
 
+        self.state = 0
+        self.time_taken = 0
+
+        # Initialize Building parameters
+        self.remain_passengers_num = 0
+        self.cumulated_reward = 0
+        self.elevators = []
+        for idx in range(self.total_elevator_num):
+            self.elevators.append(Elevator(idx, self.max_passengers_in_elevator,
+                                           self.max_floor))
+        self.floors_information = []
         for idx in range(self.max_floor):
             self.floors_information.append([])
-        for e in self.elevators:
-            e.empty()
-        self.remain_passengers_num = 0
 
     def get_remain_passengers_in_building(self):
         return sum([len(x) for x in self.floors_information])
@@ -188,6 +194,7 @@ class Building(Env):
 
 
     def render(self, step : int):
+        os.system('clear')
         for idx in reversed(list(range(1,self.max_floor))):
             print("=======================================================")
             print("= Floor #%02d ="%idx, end=' ')
@@ -227,4 +234,4 @@ class Building(Env):
         print("Total # of people: %d"%self.remain_passengers_num)
         print("Step: %d"%step)
         print('state : ',self.get_state())
-        #print('now reward : ',self.get_reward())
+        # print('now reward : ',self.get_reward())
